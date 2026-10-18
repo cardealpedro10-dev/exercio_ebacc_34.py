@@ -1,0 +1,43 @@
+name: Python application
+
+# Configuração do trigger para 'push' e 'pull_request' na branch 'main'
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    # Definir o runner como 'ubuntu-latest'
+    runs-on: ubuntu-latest
+
+    steps:
+    # Passo de checkout do código
+    - uses: actions/checkout@v3
+
+    # Passo para instalar o Python (versão 3.9)
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.9"
+
+    # Passo para instalar o Poetry via pip
+    - name: Install Poetry
+      run: |
+        pip install poetry
+
+    # Instalar as dependências com o comando exato exigido
+    - name: Install dependencies
+      run: |
+        poetry install --no-root --no-interaction
+
+    # Rodar os testes automatizados com pytest
+    - name: Test with pytest
+      run: |
+        poetry run pytest
+
+ 
