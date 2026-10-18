@@ -3,9 +3,9 @@ name: Python application
 # Configuração do trigger para 'push' e 'pull_request' na branch 'main'
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "principal" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "principal" ]
 
 permissions:
   contents: read
