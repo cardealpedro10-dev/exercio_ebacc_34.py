@@ -26,14 +26,15 @@ jobs:
         python-version: "3.9"
 
     # Passo para instalar o Poetry via pip
-    - name: Install Poetry
+    - name: test whith pytes
       run: |
-        pip install poetry
+        pytest
 
     # Instalar as dependências com o comando exato exigido
     - name: Install dependencies
       run: |
-        poetry install --no-root --no-interaction
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
     # Rodar os testes automatizados com pytest
     - name: Test with pytest
