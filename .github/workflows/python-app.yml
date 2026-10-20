@@ -1,44 +1,56 @@
-name: Python application
+name: CI Pipeline - Tests & Docker Build
 
-# Configuração do trigger para 'push' e 'pull_request' na branch 'main'
 on:
   push:
-    branches: [ "principal" ]
+    branches: [ "main", "master" ]
   pull_request:
-    branches: [ "principal" ]
+    branches: [ "main", "master" ]
 
-permissions:
-  contents: read
+env:
+  IMAGE_NAME: fastapi-app:latest
 
 jobs:
-  build:
-    # Definir o runner como 'ubuntu-latest'
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-    # Passo de checkout do código
-    - uses: actions/checkout@v3
+    # 1. Checkout do código-fonte
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-    # Passo para instalar o Python (versão 3.9)
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v3
+    # 2. Configuração do ambiente Python
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
-        python-version: "3.9"
+        python-version: "3.11"
 
-    # Passo para instalar o Poetry via pip
-    - name: test whith pytes
+    # 3. Instalação do Poetry
+    - name: Install Poetry
       run: |
-        pytest
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-    # Instalar as dependências com o comando exato exigido
+    # 4. Instalação das dependências
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        poetry install
 
-    # Rodar os testes automatizados com pytest
-    - name: Test with pytest
+    # 5. Execução dos testes automatizados com Poetry
+    - name: Run tests with Poetry
       run: |
         poetry run pytest
+
+    # 6. Build da Imagem Docker (Contexto na raiz do projeto ".")
+    - name: Build Docker Image
+      run: |
+        docker build -t ${{ env.IMAGE_NAME }} .
+
+    # 7. Teste de execução do Container Docker
+    - name: Test Docker Container Run
+      run: |
+        docker run --rm -d --name test-app -p 8000:8000 ${{ env.IMAGE_NAME }}
+        sleep 3
+        docker ps | grep test-app
+        docker stop test-app
 
  
