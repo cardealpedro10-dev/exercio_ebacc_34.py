@@ -2,9 +2,9 @@ name: CI Pipeline - Tests & Docker Build
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master", "principal" ]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master", "principal" ]
 
 env:
   IMAGE_NAME: fastapi-app:latest
@@ -14,38 +14,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Checkout do código-fonte
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # 2. Configuração do ambiente Python
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.11"
 
-    # 3. Instalação do Poetry
     - name: Install Poetry
       run: |
         curl -sSL https://install.python-poetry.org | python3 -
         echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-    # 4. Instalação das dependências
     - name: Install dependencies
       run: |
         poetry install
 
-    # 5. Execução dos testes automatizados com Poetry
     - name: Run tests with Poetry
       run: |
         poetry run pytest
 
-    # 6. Build da Imagem Docker (Contexto na raiz do projeto ".")
     - name: Build Docker Image
       run: |
         docker build -t ${{ env.IMAGE_NAME }} .
 
-    # 7. Teste de execução do Container Docker
     - name: Test Docker Container Run
       run: |
         docker run --rm -d --name test-app -p 8000:8000 ${{ env.IMAGE_NAME }}
