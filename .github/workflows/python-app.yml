@@ -1,49 +1,17 @@
-name: CI Pipeline - Tests & Docker Build
+[tool.poetry]
+name = "fastapi-app"
+version = "0.1.0"
+description = "Exercício EBAC CI/CD"
+authors = ["Estudante <aluno@ebac.com>"]
 
-on:
-  push:
-    branches: [ "main", "master", "principal" ]
-  pull_request:
-    branches: [ "main", "master", "principal" ]
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.100.0"
+uvicorn = "^0.22.0"
 
-env:
-  IMAGE_NAME: fastapi-app:latest
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
 
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.11"
-
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-    - name: Install dependencies
-      run: |
-        poetry install
-
-    - name: Run tests with Poetry
-      run: |
-        poetry run pytest
-
-    - name: Build Docker Image
-      run: |
-        docker build -t ${{ env.IMAGE_NAME }} .
-
-    - name: Test Docker Container Run
-      run: |
-        docker run --rm -d --name test-app -p 8000:8000 ${{ env.IMAGE_NAME }}
-        sleep 3
-        docker ps | grep test-app
-        docker stop test-app
-
- 
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
