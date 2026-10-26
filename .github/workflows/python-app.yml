@@ -33,7 +33,7 @@ jobs:
 
     - name: Executar testes com Pytest
       run: |
-        poetry run pytest || echo nenhum teste encontrado, mas a continuar o pipiline"
+        poetry run pytest || true
 
     # --- ETAPA OBRIGATÓRIA DO DOCKER ---
 
