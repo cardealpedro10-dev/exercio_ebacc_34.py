@@ -46,8 +46,8 @@ jobs:
 
     - name: Validar container com docker run
       run: |
-        docker rm -f test-fastapi-contairner || true
-        docker run -d --name test-fastapi-container -p 8000:8000 fastapi-app:lastest
+       docker -f test-fastapi-container || true
+       docker run -d --name test-fastapi-conteiner -p 8000:8000 fastpi-app:latest
         sleep 3
         docker ps | grep test-fastapi-container
 
