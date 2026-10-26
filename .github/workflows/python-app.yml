@@ -2,35 +2,52 @@ name: CI
 
 on:
   push:
-    branches: [ "principal" ]
+    branches: [ "principal", "main", "master" ]
+  pull_request:
+    branches: [ "principal", "main", "master" ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout do código
+      uses: actions/checkout@v4
 
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v4
+    - name: Configurar Python
+      uses: actions/setup-python@v5
       with:
-        python-version: "3.9"
+        python-version: '3.10'
 
-    - name: Install Poetry
+    - name: Instalar Poetry nativamente via curl
       run: |
         curl -sSL https://install.python-poetry.org | python3 -
         echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-    - name: Install dependencies
-      run: |
-        poetry install --no-root --no-interaction
+    - name: Verificar versão do Poetry
+      run: poetry --version
 
-    - name: Test with pytest
+    - name: Instalar dependências com Poetry
+      run: |
+        poetry install --no-interaction --no-root
+
+    - name: Executar testes com Pytest
       run: |
         poetry run pytest
 
-    - name: Build Docker Image
+    # --- ETAPA OBRIGATÓRIA DO DOCKER ---
+
+    - name: Configurar Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Construir imagem Docker da aplicação
       run: |
         docker build -t fastapi-app:latest .
+
+    - name: Validar container com docker run
+      run: |
+        docker run -d --name test-fastapi-container -p 8000:8000 fastapi-app:latest
+        sleep 3
+        docker ps | grep test-fastapi-container
 
  
