@@ -1,39 +1,36 @@
-name: CI
+name: Python application
 
 on:
   push:
-    branches: [ "principal", "main", "master" ]
+    branches: [ "main", "principal" ]
   pull_request:
-    branches: [ "principal", "main", "master" ]
+    branches: [ "main", "principal" ]
+
+permissions:
+  contents: read
 
 jobs:
   build-and-test:
+
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout do código
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-    - name: Configurar Python
+    - name: Set up Python 3.10
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: "3.10"
 
-    - name: Instalar Poetry nativamente via curl
+    - name: Install dependencies
       run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-    - name: Verificar versão do Poetry
-      run: poetry --version
-
-    - name: Instalar dependências com Poetry
-      run: |
-        poetry install --no-interaction --no-root
+        python -m pip install --upgrade pip
+        pip install poetry
+        poetry install
 
     - name: Executar testes com Pytest
       run: |
-        poetry run pytest || true
+        poetry run pytest
 
     # --- ETAPA OBRIGATÓRIA DO DOCKER ---
 
@@ -46,9 +43,8 @@ jobs:
 
     - name: Validar container com docker run
       run: |
-       docker -f test-fastapi-container || true
-       docker run -d --name test-fastapi-conteiner -p 8000:8000 fastpi-app:latest
+        docker run -d --name test-fastapi-container -p 8000:8000 fastapi-app:latest
         sleep 3
-        docker ps | grep test-fastapi-container
+        curl --fail http://localhost:8000/ || exit 1
 
  
