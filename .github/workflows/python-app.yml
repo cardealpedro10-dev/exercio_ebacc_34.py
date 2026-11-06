@@ -1,10 +1,10 @@
-name: CI/CD Pipeline
+name: Pipeline de CI/CD
 
 on:
   push:
-    branches: [ "main" ] # Ajuste para "master" se for o nome da sua branch principal
+    branches: [ "main", "master" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "master" ]
 
 env:
   IMAGE_NAME: fastapi-app
@@ -28,7 +28,8 @@ jobs:
         echo "$HOME/.local/bin" >> $GITHUB_PATH
 
     - name: Instalar Dependências
-      run: poetry install --no-interaction --no-root
+      run: |
+        poetry install --no-interaction --no-root
 
     - name: Executar Testes com Pytest
       run: |
@@ -43,16 +44,16 @@ jobs:
 
     - name: Validar Container (Smoke Test)
       run: |
-        # Executa o container em segundo plano usando a variável padronizada
+        # Executa o container em segundo plano mapeando a porta 8000
         docker run -d -p 8000:8000 --name test-container ${{ env.IMAGE_NAME }}:latest
        
         # Aguarda 5 segundos para a aplicação inicializar
         sleep 5
        
-        # Faz uma requisição para validar se a API está respondendo
+        # Faz uma requisição para garantir que a API está respondendo
         curl --fail http://localhost:8000/ || exit 1
        
-        # Para e remove o container após a validação
+        # Para e remove o container
         docker stop test-container
         docker rm test-container
 
